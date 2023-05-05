@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Space, Spin, Table, Modal, message } from "antd";
 import { ExclamationCircleFilled, SyncOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,7 +20,7 @@ const Overview = (props) => {
   const [deleteBtn, setDeleteBtn] = useState(true);
   const dispatch = useDispatch();
   const reload = useSelector((state) => state.reloadItems);
-  const [checked, setChecked] = useState([])
+  const [checked, setChecked] = useState([]);
   //data edit arr
   const [edit, setEdit] = useState([]);
 
@@ -28,7 +28,7 @@ const Overview = (props) => {
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
       selectedRows.length > 1 ? setDeleteBtn(false) : setDeleteBtn(true);
-      setChecked([...selectedRows])
+      setChecked([...selectedRows]);
     },
     getCheckboxProps: (record) => ({
       disabled: record.name === "Disabled User",
@@ -56,9 +56,9 @@ const Overview = (props) => {
   };
 
   ///get data
-  const getData = async () => {
+  const getData = useCallback(async () => {
     setLaoding(true);
-  setDeleteBtn(true)
+    setDeleteBtn(true);
     dispatch({ type: STOP_LOAD });
     apiService
       .getData(props.props.url)
@@ -75,13 +75,13 @@ const Overview = (props) => {
         setLaoding(false);
         message.error(err?.message);
       });
-  };
+  }, [dispatch, props.props.url]);
 
   if (reload) getData();
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
 
   // Delete confirm
   const handleDel = async (e) => {
@@ -97,11 +97,11 @@ const Overview = (props) => {
   };
 
   const deletSelected = () => {
-    checked?.map((e)=>{
-      handleDel(e.id)
-      return 0
-    })
-  }
+    checked?.map((e) => {
+      handleDel(e.id);
+      return 0;
+    });
+  };
 
   const showDeleteConfirm = (e) => {
     confirm({
@@ -126,10 +126,7 @@ const Overview = (props) => {
         <span className={s.title__span}></span>
         <h1 className={s.table__title}>{props.props.page} Panel</h1>
         <div className={s.table__refresh}>
-          <Button
-            onClick={deletSelected}
-            disabled={deleteBtn}
-          >
+          <Button onClick={deletSelected} disabled={deleteBtn}>
             Delete All Selected
           </Button>
           <Button onClick={getData} disabled={laoding}>
