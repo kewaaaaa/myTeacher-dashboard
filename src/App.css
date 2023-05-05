@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+}
+.loading{
+    height: calc(100vh - 170px);
+    display: flex;
+    align-items: center;
+}
+Link{
+  text-decoration: none;
+}
+.active{
+  color: red !important;
+  cursor: default;
+}
+
+@media (max-width: 1400px) {
+  .container {
+    padding: 0 10%;
+  }
+}

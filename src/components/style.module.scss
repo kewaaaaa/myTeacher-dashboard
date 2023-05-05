@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.table {
+  width: 100%;
+  overflow-x: hidden;
+  &__header {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+  }
+  &__span {
+    width: 20%;
+  }
+  &__title {
+    text-align: center;
+  }
+  &___refresh {
+    width: 20%;
+  }
+  &__box {
+    width: 100%;
+    overflow-x: scroll;
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+  }
+}
