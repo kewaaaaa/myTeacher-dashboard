@@ -97,9 +97,21 @@ const Overview = (props) => {
   };
 
   const deletSelected = () => {
-    checked?.map((e) => {
-      handleDel(e.id);
-      return 0;
+    confirm({
+      title: "Are you sure to delete selected Items?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        checked?.map((e) => {
+          handleDel(e.id);
+          return 0;
+        });
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
     });
   };
 
