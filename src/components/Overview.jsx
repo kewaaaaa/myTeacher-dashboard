@@ -126,7 +126,7 @@ const Overview = (props) => {
         <span className={s.title__span}></span>
         <h1 className={s.table__title}>{props.props.page} Panel</h1>
         <div className={s.table__refresh}>
-          <Button onClick={deletSelected} disabled={deleteBtn}>
+          <Button onClick={deletSelected} danger disabled={deleteBtn}>
             Delete All Selected
           </Button>
           <Button onClick={getData} disabled={laoding}>
