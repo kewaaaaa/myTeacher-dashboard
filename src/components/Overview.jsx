@@ -17,10 +17,25 @@ const { confirm } = Modal;
 const Overview = (props) => {
   const [users, setUsers] = useState({});
   const [laoding, setLaoding] = useState(true);
+  const [deleteBtn, setDeleteBtn] = useState(true);
   const dispatch = useDispatch();
   const reload = useSelector((state) => state.reloadItems);
+  const [checked, setChecked] = useState([])
   //data edit arr
   const [edit, setEdit] = useState([]);
+
+  // selctios
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      selectedRows.length > 1 ? setDeleteBtn(false) : setDeleteBtn(true);
+      setChecked([...selectedRows])
+    },
+    getCheckboxProps: (record) => ({
+      disabled: record.name === "Disabled User",
+      // Column configuration not to be checked
+      name: record.name,
+    }),
+  };
 
   //Modal open
   const OpenAdd = () => {
@@ -34,7 +49,7 @@ const Overview = (props) => {
     dispatch({ type: EDIT_MODAL });
 
     for (let i = 0; i < users.length; i++) {
-      if (users[i].id == id) {
+      if (users[i].id === id) {
         setEdit(users[i]);
       }
     }
@@ -43,6 +58,7 @@ const Overview = (props) => {
   ///get data
   const getData = async () => {
     setLaoding(true);
+  setDeleteBtn(true)
     dispatch({ type: STOP_LOAD });
     apiService
       .getData(props.props.url)
@@ -68,6 +84,25 @@ const Overview = (props) => {
   }, []);
 
   // Delete confirm
+  const handleDel = async (e) => {
+    setLaoding(true);
+    try {
+      const resp = await apiService.deleteData(props.props.url, e);
+      message.success(resp?.message);
+      getData();
+    } catch (error) {
+      message.error(error?.message);
+      setLaoding(false);
+    }
+  };
+
+  const deletSelected = () => {
+    checked?.map((e)=>{
+      handleDel(e.id)
+      return 0
+    })
+  }
+
   const showDeleteConfirm = (e) => {
     confirm({
       title: "Are you sure to delete this Item?",
@@ -77,18 +112,7 @@ const Overview = (props) => {
       okType: "danger",
       cancelText: "No",
       onOk() {
-        const handleDel = async () => {
-          setLaoding(true);
-          try {
-            const resp = await apiService.deleteData(props.props.url, e);
-            message.success(resp?.message);
-            getData();
-          } catch (error) {
-            message.error(error?.message);
-            setLaoding(false);
-          }
-        };
-        handleDel();
+        handleDel(e);
       },
       onCancel() {
         console.log("Cancel");
@@ -101,17 +125,20 @@ const Overview = (props) => {
       <Space className={s.table__header}>
         <span className={s.title__span}></span>
         <h1 className={s.table__title}>{props.props.page} Panel</h1>
-        <Button
-          className={s.table__refresh}
-          block
-          onClick={getData}
-          disabled={laoding}
-        >
-          <Space>
-            {laoding && <SyncOutlined spin />}
-            Refresh
-          </Space>
-        </Button>
+        <div className={s.table__refresh}>
+          <Button
+            onClick={deletSelected}
+            disabled={deleteBtn}
+          >
+            Delete All Selected
+          </Button>
+          <Button onClick={getData} disabled={laoding}>
+            <Space>
+              {laoding && <SyncOutlined spin />}
+              Refresh
+            </Space>
+          </Button>
+        </div>
       </Space>
       {laoding ? (
         <div className="loading">
@@ -129,14 +156,20 @@ const Overview = (props) => {
       ) : (
         <>
           <div className={s.table__box}>
-            <Table dataSource={users} size="small">
+            <Table
+              dataSource={users}
+              size="small"
+              rowSelection={{
+                ...rowSelection,
+              }}
+            >
               <Column
                 title="First Name"
                 dataIndex="first_name"
                 key="first_name"
               />
               <Column title="Last Name" dataIndex="last_name" key="last_name" />
-              {props.props.page == "Admin" ? (
+              {props.props.page === "Admin" ? (
                 <>
                   <Column title="Role" dataIndex="role" key="role" />
                   <Column

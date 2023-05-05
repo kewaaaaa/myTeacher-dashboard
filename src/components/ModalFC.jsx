@@ -1,13 +1,8 @@
-import { Modal, Form, Input, Button, message } from "antd";
+import { Modal, Form, Input, Button, message, Select, InputNumber } from "antd";
 import React, { useState, useEffect } from "react";
 import apiService from "../service/api";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  ADD_MODAL,
-  CLOSE_MODAL,
-  EDIT_MODAL,
-  START_LOAD,
-} from "../redux/ationTypes";
+import { CLOSE_MODAL, START_LOAD } from "../redux/ationTypes";
 import { useRef } from "react";
 
 const ModalFC = (edit) => {
@@ -26,7 +21,7 @@ const ModalFC = (edit) => {
 
   //Deafout Values
   useEffect(() => {
-    if (modalType == "Edit") {
+    if (modalType === "Edit") {
       if (formRef1.current) {
         form?.setFieldValue("first_name", edit.edit.edit.first_name);
         form?.setFieldValue("last_name", edit.edit.edit.last_name);
@@ -39,26 +34,26 @@ const ModalFC = (edit) => {
         form2?.setFieldValue("age", edit.edit.edit.age);
         form2?.setFieldValue("course", edit.edit.edit.course);
       }
+    } else if (modalType === "Add") {
+      if (formRef1.current && formRef2.current) {
+        form.resetFields();
+        form2.resetFields();
+      } else formRef1.current ? form.resetFields() : form2.resetFields();
     }
-  }, [edit]);
+  }, [edit, form, form2, modalType]);
 
   //Modal close
   const handleCancel = () => {
-    if (formRef1.current && formRef2.current) {
-      form.resetFields();
-      form2.resetFields();
-    } else formRef1.current ? form.resetFields() : form2.resetFields();
     dispatch({ type: CLOSE_MODAL });
-    dispatch({ type: EDIT_MODAL });
   };
 
   //Modal Form Submit
   const handleOk = (e) => {
     setConfirmLoading(true);
-    if (modalType == "Add") {
+    if (modalType === "Add") {
       handleAdd(e);
     }
-    if (modalType == "Edit") {
+    if (modalType === "Edit") {
       handleEdit(e);
     }
   };
@@ -80,7 +75,6 @@ const ModalFC = (edit) => {
       dispatch({ type: START_LOAD });
     } catch (error) {
       setConfirmLoading(false);
-      // message.error('error');
     }
   };
 
@@ -93,27 +87,19 @@ const ModalFC = (edit) => {
         e,
         edit?.edit?.edit?.id
       );
-      dispatch({ type: ADD_MODAL });
-      if (formRef1.current && formRef2.current) {
-        form.resetFields();
-        form2.resetFields();
-      } else formRef1.current ? form.resetFields() : form2.resetFields();
       setConfirmLoading(false);
       dispatch({ type: CLOSE_MODAL });
-      // dispatch({ type: START_LOAD });
       setTimeout(() => {
         dispatch({ type: START_LOAD });
       }, 100);
       message.success(resp?.message);
     } catch (error) {
-      // message.error('error');
       setConfirmLoading(false);
     }
   };
 
   return (
     <Modal
-      // width={1100}
       title={`${modalType} Modal`}
       open={isModalOpenRed}
       footer={null}
@@ -121,7 +107,7 @@ const ModalFC = (edit) => {
       onOk={handleOk}
       confirmLoading={confirmLoading}
     >
-      {edit.edit.props.page == "Admin" ? (
+      {edit.edit.props.page === "Admin" ? (
         <>
           <Form form={form} onFinish={handleOk} ref={formRef1}>
             <Form.Item
@@ -134,7 +120,7 @@ const ModalFC = (edit) => {
               label="First Name"
               name="first_name"
             >
-              <Input placeholder="Write the First Name" />
+              <Input placeholder="Input First Name" />
             </Form.Item>
             <Form.Item
               rules={[
@@ -146,7 +132,7 @@ const ModalFC = (edit) => {
               label="Last Name"
               name="last_name"
             >
-              <Input placeholder="Write the Last Name" />
+              <Input placeholder="Input Last Name" />
             </Form.Item>
             <Form.Item
               label="Role"
@@ -154,11 +140,38 @@ const ModalFC = (edit) => {
               rules={[
                 {
                   required: true,
-                  message: "Please input the Role!",
+                  message: "Please select the Role!",
                 },
               ]}
             >
-              <Input placeholder="Write the Role" />
+              <Select
+                showSearch
+                placeholder="Select a Role"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "admin",
+                    label: "admin",
+                  },
+                  {
+                    value: "operator",
+                    label: "operator",
+                  },
+                  {
+                    value: "manager",
+                    label: "manager",
+                  },
+                  {
+                    value: "tutor",
+                    label: "tutor",
+                  },
+                ]}
+              />
             </Form.Item>
             <div
               style={{
@@ -201,7 +214,7 @@ const ModalFC = (edit) => {
               label="First Name"
               name="first_name"
             >
-              <Input placeholder="Write the First Name" />
+              <Input placeholder="Input First Name" />
             </Form.Item>
             <Form.Item
               rules={[
@@ -213,7 +226,7 @@ const ModalFC = (edit) => {
               label="Last Name"
               name="last_name"
             >
-              <Input placeholder="Write the Last Name" />
+              <Input placeholder="Input Last Name" />
             </Form.Item>
             <Form.Item
               label="Location"
@@ -221,11 +234,78 @@ const ModalFC = (edit) => {
               rules={[
                 {
                   required: true,
-                  message: "Please input the Location!",
+                  message: "Please select the Location!",
                 },
               ]}
             >
-              <Input placeholder="Write the Location" />
+              <Select
+                showSearch
+                placeholder="Select a Location"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "Tashkent Sh.",
+                    label: "Tashkent Sh.",
+                  },
+                  {
+                    value: "Tashkent",
+                    label: "Tashkent",
+                  },
+                  {
+                    value: "Samarqand",
+                    label: "Samarqand",
+                  },
+                  {
+                    value: "Andijan",
+                    label: "Andijan",
+                  },
+                  {
+                    value: "Khorezm",
+                    label: "Khorezm",
+                  },
+                  {
+                    value: "Qaraqalpakistan",
+                    label: "Qaraqalpakistan",
+                  },
+                  {
+                    value: "Fergana",
+                    label: "Fergana",
+                  },
+                  {
+                    value: "Bukhara",
+                    label: "Bukhara",
+                  },
+                  {
+                    value: "Jizzakh",
+                    label: "Jizzakh",
+                  },
+                  {
+                    value: "Namangan",
+                    label: "Namangan",
+                  },
+                  {
+                    value: "Navoiy",
+                    label: "Navoiy",
+                  },
+                  {
+                    value: "Qashqadaryo",
+                    label: "Qashqadaryo",
+                  },
+                  {
+                    value: "Sirdaryo",
+                    label: "Sirdaryo",
+                  },
+                  {
+                    value: "Surxondaryo",
+                    label: "Surxondaryo",
+                  },
+                ]}
+              />
             </Form.Item>
             <Form.Item
               label="Age"
@@ -237,7 +317,7 @@ const ModalFC = (edit) => {
                 },
               ]}
             >
-              <Input placeholder="Write the Age" />
+              <InputNumber min={5} max={120} placeholder="Input Age" />
             </Form.Item>
             <Form.Item
               label="Course"
@@ -249,7 +329,30 @@ const ModalFC = (edit) => {
                 },
               ]}
             >
-              <Input placeholder="Write the Course" />
+              <Select
+                showSearch
+                placeholder="Select a Course"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "English",
+                    label: "English",
+                  },
+                  {
+                    value: "Russian",
+                    label: "Russian",
+                  },
+                  {
+                    value: "Uzbek",
+                    label: "Uzbek",
+                  },
+                ]}
+              />
             </Form.Item>
             <div
               style={{
